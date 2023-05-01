@@ -1,0 +1,28 @@
+<script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
+
+<script>
+  const samples = [];
+  const hertz = 440;
+  const samplesPerSecond = 44100;
+  const amplitude = 32000;
+
+  for (let i = 0; i < 3 * samplesPerSecond; i++) {
+    samples.push(
+      amplitude * Math.sin((2.0 * Math.PI * i * hertz) / samplesPerSecond)
+    );
+  }
+
+  const wav = new wavefile.WaveFile();
+  wav.fromScratch(1, samplesPerSecond, "16", samples);
+  const buffer = wav.toBuffer();
+  const blob = new Blob([buffer], { type: "audio/wav" });
+  const url = URL.createObjectURL(blob);
+
+  console.log(url);
+
+  const audio = new Audio(url);
+
+  const playAudio = () => audio.play();
+</script>
+
+<button onclick="playAudio()">Click me to play</button>
