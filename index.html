@@ -1,5 +1,13 @@
 <script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
 
+<canvas id="pluck-shape"></canvas>
+<canvas id="k-1"></canvas>
+<canvas id="k-2"></canvas>
+<canvas id="k-3"></canvas>
+<canvas id="k-4"></canvas>
+<canvas id="k-5"></canvas>
+<canvas id="k-6"></canvas>
+
 <script>
   integrate = (xi, k) => {
     let result = 0.0;
@@ -85,6 +93,68 @@
   const pureAudio = new Audio(pureUrl);
 
   const playPure = () => pureAudio.play();
+
+  const pluckShapeCanvas = document.getElementById("pluck-shape");
+  if (pluckShapeCanvas instanceof HTMLCanvasElement) {
+    pluckShapeCanvas.height = 500;
+    pluckShapeCanvas.width = 500;
+    const context = pluckShapeCanvas.getContext("2d");
+    if (context instanceof CanvasRenderingContext2D) {
+      // axes
+      context.lineWidth = 3;
+      context.strokeStyle = "black";
+      context.moveTo(10, 250);
+      context.lineTo(490, 250);
+      context.moveTo(10, 490);
+      context.lineTo(10, 10);
+      context.stroke();
+
+      // string
+      context.strokeStyle = "green";
+      context.beginPath();
+      context.moveTo(10, 250);
+      context.lineTo(10 + xi * 490, 10);
+      context.lineTo(480, 250);
+      context.stroke();
+    }
+  }
+
+  function drawComponent(name, amplitude, k) {
+    const canvasElement = document.getElementById(name);
+    if (canvasElement instanceof HTMLCanvasElement) {
+      canvasElement.width = 500;
+      canvasElement.height = 500;
+      const context = canvasElement.getContext("2d");
+      if (context instanceof CanvasRenderingContext2D) {
+        // axes
+        context.lineWidth = 3;
+        context.strokeStyle = "black";
+        context.moveTo(10, 250);
+        context.lineTo(490, 250);
+        context.moveTo(10, 490);
+        context.lineTo(10, 10);
+        context.stroke();
+
+        // curve
+        context.strokeStyle = "green";
+        context.beginPath();
+        context.moveTo(10, 250);
+        for (i = 0; i < Math.PI; i += 0.1) {
+          const value = -amplitude * Math.sin(k * i) + 250;
+          context.lineTo(10 + 480 * (i / Math.PI), value);
+        }
+        context.lineTo(490, 250);
+        context.stroke();
+      }
+    }
+  }
+
+  drawComponent("k-1", 230 * componentAmplitudes[1], 1);
+  drawComponent("k-2", 230 * componentAmplitudes[2], 2);
+  drawComponent("k-3", 230 * componentAmplitudes[3], 3);
+  drawComponent("k-4", 230 * componentAmplitudes[4], 4);
+  drawComponent("k-5", 230 * componentAmplitudes[5], 5);
+  drawComponent("k-6", 230 * componentAmplitudes[6], 6);
 </script>
 
 <button onclick="playPure()">Click me to play pure</button>
