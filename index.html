@@ -1,14 +1,67 @@
 <script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
 
 <script>
-  const samples = [];
-  const hertz = 440;
-  const samplesPerSecond = 44100;
-  const amplitude = 32000;
+  integrate = (xi, k) => {
+    let result = 0.0;
+    let dx = 0.001;
+    for (let x = 0; x < 1; x += dx) {
+      let f;
+      if (x < xi) {
+        f = x / xi;
+      } else {
+        f = (x - 1) / (xi - 1);
+      }
+      result += f * Math.sin(k * Math.PI * x) * dx;
+    }
+    return result;
+  };
 
-  for (let i = 0; i < 3 * samplesPerSecond; i++) {
-    samples.push(
-      amplitude * Math.sin((2.0 * Math.PI * i * hertz) / samplesPerSecond)
+  const hertz = 220;
+  const samplesPerSecond = 44100;
+  const amplitude = 4000;
+
+  // The point at which you pluck.
+  const xi = 0.6180339;
+
+  const overtoneCount = 30;
+
+  // Get the Fourier amplitudes for some k values.
+  const componentAmplitudes = [0.0];
+  const randomOffsets = [0.0];
+  for (let k = 1; k < overtoneCount; k++) {
+    componentAmplitudes.push(integrate(xi, k));
+    randomOffsets.push(Math.random() * Math.PI);
+  }
+
+  console.log(componentAmplitudes);
+
+  // Create some samples.
+  const samples = [];
+
+  const wavDurationInSeconds = 1.5;
+  for (let i = 0; i < wavDurationInSeconds * samplesPerSecond; i++) {
+    let value = 0.0;
+    const envelope = Math.exp(
+      (-0.1 * i) / (wavDurationInSeconds * samplesPerSecond)
+    );
+    for (let k = 1; k < overtoneCount; k++) {
+      const omega = k - 0.1 * k * k;
+      value +=
+        amplitude *
+        componentAmplitudes[k] *
+        Math.sin(
+          (2.0 * Math.PI * omega * i * hertz) / samplesPerSecond +
+            randomOffsets[k]
+        );
+    }
+    samples.push(amplitude + envelope * value);
+  }
+
+  const pureSamples = [];
+  for (let i = 0; i < wavDurationInSeconds * samplesPerSecond; i++) {
+    pureSamples.push(
+      amplitude +
+        amplitude * Math.sin((2.0 * Math.PI * i * hertz) / samplesPerSecond)
     );
   }
 
@@ -23,6 +76,16 @@
   const audio = new Audio(url);
 
   const playAudio = () => audio.play();
+
+  const wavPure = new wavefile.WaveFile();
+  wavPure.fromScratch(1, samplesPerSecond, "16", pureSamples);
+  const pureBuffer = wavPure.toBuffer();
+  const pureBlob = new Blob([pureBuffer], { type: "audio/wav" });
+  const pureUrl = URL.createObjectURL(pureBlob);
+  const pureAudio = new Audio(pureUrl);
+
+  const playPure = () => pureAudio.play();
 </script>
 
+<button onclick="playPure()">Click me to play pure</button>
 <button onclick="playAudio()">Click me to play</button>
