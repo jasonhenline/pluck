@@ -16,9 +16,9 @@
     return result;
   };
 
-  const hertz = 220;
+  const hertz = 440;
   const samplesPerSecond = 44100;
-  const amplitude = 4000;
+  const amplitude = 32000;
 
   // The point at which you pluck.
   const xi = 0.6180339;
@@ -41,11 +41,12 @@
   const wavDurationInSeconds = 1.5;
   for (let i = 0; i < wavDurationInSeconds * samplesPerSecond; i++) {
     let value = 0.0;
-    const envelope = Math.exp(
-      (-0.1 * i) / (wavDurationInSeconds * samplesPerSecond)
-    );
+    const envelope = 1.0;
+    // Math.exp(
+    //   (-0.1 * i) / (wavDurationInSeconds * samplesPerSecond)
+    // );
     for (let k = 1; k < overtoneCount; k++) {
-      const omega = k - 0.1 * k * k;
+      const omega = k; //- 0.1 * k * k;
       value +=
         amplitude *
         componentAmplitudes[k] *
@@ -54,14 +55,13 @@
             randomOffsets[k]
         );
     }
-    samples.push(amplitude + envelope * value);
+    samples.push(envelope * value);
   }
 
   const pureSamples = [];
   for (let i = 0; i < wavDurationInSeconds * samplesPerSecond; i++) {
     pureSamples.push(
-      amplitude +
-        amplitude * Math.sin((2.0 * Math.PI * i * hertz) / samplesPerSecond)
+      amplitude * Math.sin((2.0 * Math.PI * i * hertz) / samplesPerSecond)
     );
   }
 
