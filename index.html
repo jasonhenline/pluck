@@ -4,6 +4,10 @@
     flex-direction: column;
     align-items: center;
   }
+
+  .buttons {
+    margin-bottom: 20px;
+  }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
@@ -113,66 +117,55 @@
   const audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
   const pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
 
+  /**
+   * @param {(x: number) => number} f
+   * @param {HTMLCanvasElement} canvasElement
+   */
+  function drawGraph(f, canvasElement) {
+    const margin = 10;
+    const height = 100;
+    const width = 300;
+    canvasElement.height = height + 2 * margin;
+    canvasElement.width = width + 2 * margin;
+    const context = canvasElement.getContext("2d");
+    if (!(context instanceof CanvasRenderingContext2D)) {
+      return;
+    }
+    // Draw axes.
+    context.lineWidth = 3;
+    context.strokeStyle = "black";
+    context.moveTo(margin, margin + height / 2);
+    context.lineTo(margin + width, margin + height / 2);
+    context.stroke();
+
+    // Draw function.
+    context.strokeStyle = "green";
+    context.beginPath();
+    context.moveTo(margin, margin + height / 2);
+    for (let x = 0.0; x < 1.0; x += 0.01) {
+      context.lineTo(margin + x * width, margin + (1.0 - f(x)) * (height / 2));
+    }
+    context.stroke();
+  }
+
   function drawPluckShape() {
     const pluckShapeCanvas = document.getElementById("pluck-shape");
     if (pluckShapeCanvas instanceof HTMLCanvasElement) {
-      pluckShapeCanvas.height = 500;
-      pluckShapeCanvas.width = 500;
-      const context = pluckShapeCanvas.getContext("2d");
-      if (context instanceof CanvasRenderingContext2D) {
-        // axes
-        context.lineWidth = 3;
-        context.strokeStyle = "black";
-        context.moveTo(10, 250);
-        context.lineTo(490, 250);
-        context.moveTo(10, 490);
-        context.lineTo(10, 10);
-        context.stroke();
-
-        // string
-        context.strokeStyle = "green";
-        context.beginPath();
-        context.moveTo(10, 250);
-        context.lineTo(10 + s * 490, 10);
-        context.lineTo(480, 250);
-        context.stroke();
-      }
+      drawGraph(getTentFunction(s), pluckShapeCanvas);
     }
   }
 
   function drawComponent(name, amplitude, k) {
     const canvasElement = document.getElementById(name);
     if (canvasElement instanceof HTMLCanvasElement) {
-      canvasElement.width = 500;
-      canvasElement.height = 500;
-      const context = canvasElement.getContext("2d");
-      if (context instanceof CanvasRenderingContext2D) {
-        // axes
-        context.lineWidth = 3;
-        context.strokeStyle = "black";
-        context.moveTo(10, 250);
-        context.lineTo(490, 250);
-        context.moveTo(10, 490);
-        context.lineTo(10, 10);
-        context.stroke();
-
-        // curve
-        context.strokeStyle = "green";
-        context.beginPath();
-        context.moveTo(10, 250);
-        for (let i = 0; i < Math.PI; i += 0.1) {
-          const value = -amplitude * Math.sin(k * i) + 250;
-          context.lineTo(10 + 480 * (i / Math.PI), value);
-        }
-        context.lineTo(490, 250);
-        context.stroke();
-      }
+      const sineFunction = getSineFunction(k);
+      drawGraph((x) => amplitude * sineFunction(x), canvasElement);
     }
   }
 </script>
 
 <div class="components">
-  <div>
+  <div class="buttons">
     <button onclick="pureAudio.play()">Click me to play pure</button>
     <button onclick="audio.play()">Click me to play</button>
   </div>
@@ -187,10 +180,10 @@
 
 <script>
   drawPluckShape();
-  drawComponent("k-1", 230 * componentAmplitudes[1], 1);
-  drawComponent("k-2", 230 * componentAmplitudes[2], 2);
-  drawComponent("k-3", 230 * componentAmplitudes[3], 3);
-  drawComponent("k-4", 230 * componentAmplitudes[4], 4);
-  drawComponent("k-5", 230 * componentAmplitudes[5], 5);
-  drawComponent("k-6", 230 * componentAmplitudes[6], 6);
+  drawComponent("k-1", componentAmplitudes[1], 1);
+  drawComponent("k-2", componentAmplitudes[2], 2);
+  drawComponent("k-3", componentAmplitudes[3], 3);
+  drawComponent("k-4", componentAmplitudes[4], 4);
+  drawComponent("k-5", componentAmplitudes[5], 5);
+  drawComponent("k-6", componentAmplitudes[6], 6);
 </script>
