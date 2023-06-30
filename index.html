@@ -131,7 +131,7 @@
     }
     context.clearRect(0, 0, canvasElement.width, canvasElement.height);
     // Draw axes.
-    context.lineWidth = 3;
+    context.lineWidth = 2;
     context.strokeStyle = "black";
     context.moveTo(margin, margin + height / 2);
     context.lineTo(margin + width, margin + height / 2);
@@ -177,7 +177,7 @@
     <button onclick="pureAudio.play()">Click me to play pure</button>
     <button onclick="audio.play()">Click me to play</button>
   </div>
-  <canvas id="pluck-shape" width="300" height="100"></canvas>
+  <canvas id="pluck-shape" width="300" height="300"></canvas>
   <canvas id="k-1" width="300" height="100"></canvas>
   <canvas id="k-2" width="300" height="100"></canvas>
   <canvas id="k-3" width="300" height="100"></canvas>
@@ -187,11 +187,19 @@
 </div>
 
 <script>
-  drawPluckShape(componentAmplitudes);
-  drawComponent("k-1", componentAmplitudes[1], 1);
-  drawComponent("k-2", componentAmplitudes[2], 2);
-  drawComponent("k-3", componentAmplitudes[3], 3);
-  drawComponent("k-4", componentAmplitudes[4], 4);
-  drawComponent("k-5", componentAmplitudes[5], 5);
-  drawComponent("k-6", componentAmplitudes[6], 6);
+  function drawEverything(t) {
+    drawPluckShape(componentAmplitudes);
+    drawComponent("k-1", componentAmplitudes[1], 1);
+    drawComponent("k-2", componentAmplitudes[2], 2);
+    drawComponent("k-3", componentAmplitudes[3], 3);
+    drawComponent("k-4", componentAmplitudes[4], 4);
+    drawComponent("k-5", componentAmplitudes[5], 5);
+    drawComponent("k-6", componentAmplitudes[6], 6);
+
+    // requestAnimationFrame((t) => {
+    //   drawEverything(t);
+    // });
+  }
+
+  drawEverything(0.0);
 </script>
