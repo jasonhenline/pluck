@@ -187,19 +187,28 @@
 </div>
 
 <script>
-  function drawEverything(t) {
-    drawPluckShape(componentAmplitudes);
-    drawComponent("k-1", componentAmplitudes[1], 1);
-    drawComponent("k-2", componentAmplitudes[2], 2);
-    drawComponent("k-3", componentAmplitudes[3], 3);
-    drawComponent("k-4", componentAmplitudes[4], 4);
-    drawComponent("k-5", componentAmplitudes[5], 5);
-    drawComponent("k-6", componentAmplitudes[6], 6);
+  let startTime = performance.now();
 
-    // requestAnimationFrame((t) => {
-    //   drawEverything(t);
-    // });
+  function drawEverything(t) {
+    const elapsedTime = t - startTime;
+
+    const newAmplitudes = [];
+    for (let k = 0; k < componentAmplitudes.length; k++) {
+      const frequency = getFrequencyForSineFunction(k) / baseHertz / 4.0;
+      const factor = Math.sin(2.0 * Math.PI * frequency * (elapsedTime / 1000));
+      newAmplitudes.push(componentAmplitudes[k] * factor);
+    }
+
+    drawPluckShape(newAmplitudes);
+    drawComponent("k-1", newAmplitudes[1], 1);
+    drawComponent("k-2", newAmplitudes[2], 2);
+    drawComponent("k-3", newAmplitudes[3], 3);
+    drawComponent("k-4", newAmplitudes[4], 4);
+    drawComponent("k-5", newAmplitudes[5], 5);
+    drawComponent("k-6", newAmplitudes[6], 6);
+
+    requestAnimationFrame(drawEverything);
   }
 
-  drawEverything(0.0);
+  drawEverything(startTime);
 </script>
