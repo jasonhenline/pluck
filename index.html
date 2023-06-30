@@ -1,12 +1,12 @@
-<script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
+<style>
+  .components {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+</style>
 
-<canvas id="pluck-shape"></canvas>
-<canvas id="k-1"></canvas>
-<canvas id="k-2"></canvas>
-<canvas id="k-3"></canvas>
-<canvas id="k-4"></canvas>
-<canvas id="k-5"></canvas>
-<canvas id="k-6"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
 
 <script>
   // @ts-check
@@ -113,28 +113,30 @@
   const audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
   const pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
 
-  const pluckShapeCanvas = document.getElementById("pluck-shape");
-  if (pluckShapeCanvas instanceof HTMLCanvasElement) {
-    pluckShapeCanvas.height = 500;
-    pluckShapeCanvas.width = 500;
-    const context = pluckShapeCanvas.getContext("2d");
-    if (context instanceof CanvasRenderingContext2D) {
-      // axes
-      context.lineWidth = 3;
-      context.strokeStyle = "black";
-      context.moveTo(10, 250);
-      context.lineTo(490, 250);
-      context.moveTo(10, 490);
-      context.lineTo(10, 10);
-      context.stroke();
+  function drawPluckShape() {
+    const pluckShapeCanvas = document.getElementById("pluck-shape");
+    if (pluckShapeCanvas instanceof HTMLCanvasElement) {
+      pluckShapeCanvas.height = 500;
+      pluckShapeCanvas.width = 500;
+      const context = pluckShapeCanvas.getContext("2d");
+      if (context instanceof CanvasRenderingContext2D) {
+        // axes
+        context.lineWidth = 3;
+        context.strokeStyle = "black";
+        context.moveTo(10, 250);
+        context.lineTo(490, 250);
+        context.moveTo(10, 490);
+        context.lineTo(10, 10);
+        context.stroke();
 
-      // string
-      context.strokeStyle = "green";
-      context.beginPath();
-      context.moveTo(10, 250);
-      context.lineTo(10 + s * 490, 10);
-      context.lineTo(480, 250);
-      context.stroke();
+        // string
+        context.strokeStyle = "green";
+        context.beginPath();
+        context.moveTo(10, 250);
+        context.lineTo(10 + s * 490, 10);
+        context.lineTo(480, 250);
+        context.stroke();
+      }
     }
   }
 
@@ -167,7 +169,24 @@
       }
     }
   }
+</script>
 
+<div class="components">
+  <div>
+    <button onclick="pureAudio.play()">Click me to play pure</button>
+    <button onclick="audio.play()">Click me to play</button>
+  </div>
+  <canvas id="pluck-shape"></canvas>
+  <canvas id="k-1"></canvas>
+  <canvas id="k-2"></canvas>
+  <canvas id="k-3"></canvas>
+  <canvas id="k-4"></canvas>
+  <canvas id="k-5"></canvas>
+  <canvas id="k-6"></canvas>
+</div>
+
+<script>
+  drawPluckShape();
   drawComponent("k-1", 230 * componentAmplitudes[1], 1);
   drawComponent("k-2", 230 * componentAmplitudes[2], 2);
   drawComponent("k-3", 230 * componentAmplitudes[3], 3);
@@ -175,6 +194,3 @@
   drawComponent("k-5", 230 * componentAmplitudes[5], 5);
   drawComponent("k-6", 230 * componentAmplitudes[6], 6);
 </script>
-
-<button onclick="pureAudio.play()">Click me to play pure</button>
-<button onclick="audio.play()">Click me to play</button>
