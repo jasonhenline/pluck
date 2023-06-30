@@ -11,8 +11,29 @@
 <script>
   // @ts-check
 
-  // The number of samples per second used by our wavefile format.
-  const SAMPLES_PER_SECOND = 44100;
+  /**
+   * Creates an audio element from an air pressure function.
+   *
+   * @param {(t: number) => number} f A function from time (in seconds) to pressure.
+   * @param {number} durationInSeconds The number of seconds over which to sample.
+   * @return {HTMLAudioElement}
+   */
+  function createAudioElement(f, durationInSeconds) {
+    const SAMPLES_PER_SECOND = 44100; // standard value used by wav files
+
+    const sampleCount = SAMPLES_PER_SECOND * durationInSeconds;
+    const samples = [];
+    for (let i = 0; i < sampleCount; i++) {
+      samples.push(f(i / SAMPLES_PER_SECOND));
+    }
+
+    const wav = new wavefile.WaveFile();
+    wav.fromScratch(1, SAMPLES_PER_SECOND, "16", samples);
+    const buffer = wav.toBuffer();
+    const blob = new Blob([buffer], { type: "audio/wav" });
+    const url = URL.createObjectURL(blob);
+    return new Audio(url);
+  }
 
   integrate = (xi, k) => {
     let result = 0.0;
@@ -48,52 +69,25 @@
   console.log(componentAmplitudes);
 
   // Create some samples.
-  const samples = [];
 
   const wavDurationInSeconds = 1.5;
-  for (let i = 0; i < wavDurationInSeconds * SAMPLES_PER_SECOND; i++) {
-    let value = 0.0;
-    const envelope = 1.0;
-    // Math.exp(
-    //   (-0.1 * i) / (wavDurationInSeconds * samplesPerSecond)
-    // );
+
+  const overtoneFunction = (t) => {
+    let result = 0.0;
     for (let k = 1; k < overtoneCount; k++) {
-      const omega = k; //- 0.1 * k * k;
-      value +=
+      const omega = k; // This is the dispersion relation.
+      result +=
         amplitude *
         componentAmplitudes[k] *
-        Math.sin(
-          (2.0 * Math.PI * omega * i * hertz) / SAMPLES_PER_SECOND +
-            randomOffsets[k]
-        );
+        Math.sin(2.0 * Math.PI * omega * hertz * t);
     }
-    samples.push(envelope * value);
-  }
+    return result;
+  };
 
-  const pureSamples = [];
-  for (let i = 0; i < wavDurationInSeconds * SAMPLES_PER_SECOND; i++) {
-    pureSamples.push(
-      amplitude * Math.sin((2.0 * Math.PI * i * hertz) / SAMPLES_PER_SECOND)
-    );
-  }
+  const pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * hertz * t);
 
-  /**
-   * Creates an audio element from an array of samples.
-   *
-   * @param {number[]} samples The array of samples.
-   * @return {HTMLAudioElement}
-   */
-  function createAudioElement(samples) {
-    const wav = new wavefile.WaveFile();
-    wav.fromScratch(1, SAMPLES_PER_SECOND, "16", samples);
-    const buffer = wav.toBuffer();
-    const blob = new Blob([buffer], { type: "audio/wav" });
-    const url = URL.createObjectURL(blob);
-    return new Audio(url);
-  }
-
-  const audio = createAudioElement(samples);
-  const pureAudio = createAudioElement(pureSamples);
+  const audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
+  const pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
 
   const pluckShapeCanvas = document.getElementById("pluck-shape");
   if (pluckShapeCanvas instanceof HTMLCanvasElement) {
@@ -140,7 +134,7 @@
         context.strokeStyle = "green";
         context.beginPath();
         context.moveTo(10, 250);
-        for (i = 0; i < Math.PI; i += 0.1) {
+        for (let i = 0; i < Math.PI; i += 0.1) {
           const value = -amplitude * Math.sin(k * i) + 250;
           context.lineTo(10 + 480 * (i / Math.PI), value);
         }
