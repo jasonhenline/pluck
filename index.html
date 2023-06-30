@@ -11,6 +11,9 @@
 <script>
   // @ts-check
 
+  // The number of samples per second used by our wavefile format.
+  const SAMPLES_PER_SECOND = 44100;
+
   integrate = (xi, k) => {
     let result = 0.0;
     let dx = 0.001;
@@ -27,7 +30,6 @@
   };
 
   const hertz = 440;
-  const samplesPerSecond = 44100;
   const amplitude = 32000;
 
   // The point at which you pluck.
@@ -49,7 +51,7 @@
   const samples = [];
 
   const wavDurationInSeconds = 1.5;
-  for (let i = 0; i < wavDurationInSeconds * samplesPerSecond; i++) {
+  for (let i = 0; i < wavDurationInSeconds * SAMPLES_PER_SECOND; i++) {
     let value = 0.0;
     const envelope = 1.0;
     // Math.exp(
@@ -61,7 +63,7 @@
         amplitude *
         componentAmplitudes[k] *
         Math.sin(
-          (2.0 * Math.PI * omega * i * hertz) / samplesPerSecond +
+          (2.0 * Math.PI * omega * i * hertz) / SAMPLES_PER_SECOND +
             randomOffsets[k]
         );
     }
@@ -69,9 +71,9 @@
   }
 
   const pureSamples = [];
-  for (let i = 0; i < wavDurationInSeconds * samplesPerSecond; i++) {
+  for (let i = 0; i < wavDurationInSeconds * SAMPLES_PER_SECOND; i++) {
     pureSamples.push(
-      amplitude * Math.sin((2.0 * Math.PI * i * hertz) / samplesPerSecond)
+      amplitude * Math.sin((2.0 * Math.PI * i * hertz) / SAMPLES_PER_SECOND)
     );
   }
 
@@ -83,7 +85,7 @@
    */
   function createAudioElement(samples) {
     const wav = new wavefile.WaveFile();
-    wav.fromScratch(1, samplesPerSecond, "16", samples);
+    wav.fromScratch(1, SAMPLES_PER_SECOND, "16", samples);
     const buffer = wav.toBuffer();
     const blob = new Blob([buffer], { type: "audio/wav" });
     const url = URL.createObjectURL(blob);
