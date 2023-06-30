@@ -89,9 +89,9 @@
   const amplitude = 32000;
 
   // The point at which you pluck.
-  const s = 0.6180339;
+  const s = 0.25; // 0.6180339;
 
-  const overtoneCount = 30;
+  const overtoneCount = 120;
 
   // Get the Fourier amplitudes for some k values.
   const componentAmplitudes = getAmplitudes(s, overtoneCount);
@@ -131,10 +131,11 @@
     }
     context.clearRect(0, 0, canvasElement.width, canvasElement.height);
     // Draw axes.
-    context.lineWidth = 2;
     context.strokeStyle = "black";
+    context.beginPath();
     context.moveTo(margin, margin + height / 2);
     context.lineTo(margin + width, margin + height / 2);
+    context.lineWidth = 2;
     context.stroke();
 
     // Draw function.
@@ -144,6 +145,7 @@
     for (let x = 0.0; x < 1.0; x += 0.01) {
       context.lineTo(margin + x * width, margin + (1.0 - f(x)) * (height / 2));
     }
+    context.lineWidth = 1;
     context.stroke();
   }
 
