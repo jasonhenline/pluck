@@ -122,11 +122,9 @@
    * @param {HTMLCanvasElement} canvasElement
    */
   function drawGraph(f, canvasElement) {
-    const margin = 10;
-    const height = 100;
-    const width = 300;
-    canvasElement.height = height + 2 * margin;
-    canvasElement.width = width + 2 * margin;
+    const margin = 5;
+    const height = canvasElement.height - 2 * margin;
+    const width = canvasElement.width - 2 * margin;
     const context = canvasElement.getContext("2d");
     if (!(context instanceof CanvasRenderingContext2D)) {
       return;
@@ -178,13 +176,13 @@
     <button onclick="pureAudio.play()">Click me to play pure</button>
     <button onclick="audio.play()">Click me to play</button>
   </div>
-  <canvas id="pluck-shape"></canvas>
-  <canvas id="k-1"></canvas>
-  <canvas id="k-2"></canvas>
-  <canvas id="k-3"></canvas>
-  <canvas id="k-4"></canvas>
-  <canvas id="k-5"></canvas>
-  <canvas id="k-6"></canvas>
+  <canvas id="pluck-shape" width="300" height="100"></canvas>
+  <canvas id="k-1" width="300" height="100"></canvas>
+  <canvas id="k-2" width="300" height="100"></canvas>
+  <canvas id="k-3" width="300" height="100"></canvas>
+  <canvas id="k-4" width="300" height="100"></canvas>
+  <canvas id="k-5" width="300" height="100"></canvas>
+  <canvas id="k-6" width="300" height="100"></canvas>
 </div>
 
 <script>
