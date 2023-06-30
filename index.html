@@ -43,6 +43,14 @@
     return integrate(f);
   }
 
+  function getAmplitudes(s, count) {
+    const results = [];
+    for (let k = 0; k < count; k++) {
+      results.push(computeTentSineAmplitude({ s, k }));
+    }
+    return results;
+  }
+
   /**
    * Creates an audio element from an air pressure function.
    *
@@ -82,17 +90,9 @@
   const overtoneCount = 30;
 
   // Get the Fourier amplitudes for some k values.
-  const componentAmplitudes = [0.0];
-  const randomOffsets = [0.0];
-  for (let k = 1; k < overtoneCount; k++) {
-    componentAmplitudes.push(computeTentSineAmplitude({ s, k }));
-    randomOffsets.push(Math.random() * Math.PI);
-  }
-
-  console.log(componentAmplitudes);
+  const componentAmplitudes = getAmplitudes(s, overtoneCount);
 
   // Create some samples.
-
   const wavDurationInSeconds = 1.5;
 
   const overtoneFunction = (t) => {
