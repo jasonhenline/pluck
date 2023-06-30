@@ -148,10 +148,19 @@
     context.stroke();
   }
 
-  function drawPluckShape() {
+  function drawPluckShape(amplitudes) {
     const pluckShapeCanvas = document.getElementById("pluck-shape");
     if (pluckShapeCanvas instanceof HTMLCanvasElement) {
-      drawGraph(getTentFunction(s), pluckShapeCanvas);
+      const f = (x) => {
+        let result = 0.0;
+        for (let k = 0; k < amplitudes.length; k++) {
+          const amplitude = amplitudes[k];
+          const sineFunction = getSineFunction(k);
+          result += amplitude * sineFunction(x);
+        }
+        return result;
+      };
+      drawGraph(f, pluckShapeCanvas);
     }
   }
 
@@ -179,7 +188,7 @@
 </div>
 
 <script>
-  drawPluckShape();
+  drawPluckShape(componentAmplitudes);
   drawComponent("k-1", componentAmplitudes[1], 1);
   drawComponent("k-2", componentAmplitudes[2], 2);
   drawComponent("k-3", componentAmplitudes[3], 3);
