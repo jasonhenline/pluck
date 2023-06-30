@@ -129,6 +129,7 @@
     if (!(context instanceof CanvasRenderingContext2D)) {
       return;
     }
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
     // Draw axes.
     context.lineWidth = 3;
     context.strokeStyle = "black";
