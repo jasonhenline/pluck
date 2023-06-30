@@ -9,6 +9,8 @@
 <canvas id="k-6"></canvas>
 
 <script>
+  // @ts-check
+
   integrate = (xi, k) => {
     let result = 0.0;
     let dx = 0.001;
@@ -73,26 +75,23 @@
     );
   }
 
-  const wav = new wavefile.WaveFile();
-  wav.fromScratch(1, samplesPerSecond, "16", samples);
-  const buffer = wav.toBuffer();
-  const blob = new Blob([buffer], { type: "audio/wav" });
-  const url = URL.createObjectURL(blob);
+  /**
+   * Creates an audio element from an array of samples.
+   *
+   * @param {number[]} samples The array of samples.
+   * @return {HTMLAudioElement}
+   */
+  function createAudioElement(samples) {
+    const wav = new wavefile.WaveFile();
+    wav.fromScratch(1, samplesPerSecond, "16", samples);
+    const buffer = wav.toBuffer();
+    const blob = new Blob([buffer], { type: "audio/wav" });
+    const url = URL.createObjectURL(blob);
+    return new Audio(url);
+  }
 
-  console.log(url);
-
-  const audio = new Audio(url);
-
-  const playAudio = () => audio.play();
-
-  const wavPure = new wavefile.WaveFile();
-  wavPure.fromScratch(1, samplesPerSecond, "16", pureSamples);
-  const pureBuffer = wavPure.toBuffer();
-  const pureBlob = new Blob([pureBuffer], { type: "audio/wav" });
-  const pureUrl = URL.createObjectURL(pureBlob);
-  const pureAudio = new Audio(pureUrl);
-
-  const playPure = () => pureAudio.play();
+  const audio = createAudioElement(samples);
+  const pureAudio = createAudioElement(pureSamples);
 
   const pluckShapeCanvas = document.getElementById("pluck-shape");
   if (pluckShapeCanvas instanceof HTMLCanvasElement) {
@@ -157,5 +156,5 @@
   drawComponent("k-6", 230 * componentAmplitudes[6], 6);
 </script>
 
-<button onclick="playPure()">Click me to play pure</button>
-<button onclick="playAudio()">Click me to play</button>
+<button onclick="pureAudio.play()">Click me to play pure</button>
+<button onclick="audio.play()">Click me to play</button>
