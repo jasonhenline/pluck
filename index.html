@@ -11,6 +11,38 @@
 <script>
   // @ts-check
 
+  function getTentFunction(s) {
+    return (x) => {
+      if (x < s) {
+        return x / s;
+      } else {
+        return (1 - x) / (1 - s);
+      }
+    };
+  }
+
+  function getSineFunction(k) {
+    return (x) => {
+      return Math.sin(Math.PI * k * x);
+    };
+  }
+
+  function integrate(f) {
+    const dx = 1e-4;
+    let result = 0.0;
+    for (let x = 0.0; x < 1.0; x += dx) {
+      result += f(x) * dx;
+    }
+    return result;
+  }
+
+  function computeTentSineAmplitude({ s, k }) {
+    const tentFunction = getTentFunction(s);
+    const sineFunction = getSineFunction(k);
+    const f = (x) => tentFunction(x) * sineFunction(x);
+    return integrate(f);
+  }
+
   /**
    * Creates an audio element from an air pressure function.
    *
@@ -35,26 +67,17 @@
     return new Audio(url);
   }
 
-  integrate = (xi, k) => {
-    let result = 0.0;
-    let dx = 0.001;
-    for (let x = 0; x < 1; x += dx) {
-      let f;
-      if (x < xi) {
-        f = x / xi;
-      } else {
-        f = (x - 1) / (xi - 1);
-      }
-      result += f * Math.sin(k * Math.PI * x) * dx;
-    }
-    return result;
-  };
+  const baseHertz = 440;
 
-  const hertz = 440;
+  function getFrequencyForSineFunction(k) {
+    // Play around here to experiment with dispersion relations.
+    return baseHertz * k;
+  }
+
   const amplitude = 32000;
 
   // The point at which you pluck.
-  const xi = 0.6180339;
+  const s = 0.6180339;
 
   const overtoneCount = 30;
 
@@ -62,7 +85,7 @@
   const componentAmplitudes = [0.0];
   const randomOffsets = [0.0];
   for (let k = 1; k < overtoneCount; k++) {
-    componentAmplitudes.push(integrate(xi, k));
+    componentAmplitudes.push(computeTentSineAmplitude({ s, k }));
     randomOffsets.push(Math.random() * Math.PI);
   }
 
@@ -75,16 +98,17 @@
   const overtoneFunction = (t) => {
     let result = 0.0;
     for (let k = 1; k < overtoneCount; k++) {
-      const omega = k; // This is the dispersion relation.
+      const frequency = getFrequencyForSineFunction(k);
       result +=
         amplitude *
         componentAmplitudes[k] *
-        Math.sin(2.0 * Math.PI * omega * hertz * t);
+        Math.sin(2.0 * Math.PI * frequency * t);
     }
     return result;
   };
 
-  const pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * hertz * t);
+  const pureFunction = (t) =>
+    amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
 
   const audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
   const pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
@@ -108,7 +132,7 @@
       context.strokeStyle = "green";
       context.beginPath();
       context.moveTo(10, 250);
-      context.lineTo(10 + xi * 490, 10);
+      context.lineTo(10 + s * 490, 10);
       context.lineTo(480, 250);
       context.stroke();
     }
