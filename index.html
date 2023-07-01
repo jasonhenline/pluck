@@ -25,6 +25,16 @@
     };
   }
 
+  function getSpikeFunction(s) {
+    return (x) => {
+      if (x < s || x > s + 0.1) {
+        return 0.0;
+      } else {
+        return (x - s) / 0.1;
+      }
+    };
+  }
+
   function getSineFunction(k) {
     return (x) => {
       return Math.sin(Math.PI * k * x);
@@ -47,10 +57,22 @@
     return integrate(f);
   }
 
+  function computeSpikeSineAmplitude({ s, k }) {
+    const spikeFunction = getSpikeFunction(s);
+    const sineFunction = getSineFunction(k);
+    const f = (x) => spikeFunction(x) * sineFunction(x);
+    return integrate(f);
+  }
+
+  const useTent = true;
+
   function getAmplitudes(s, count) {
     const results = [];
     for (let k = 0; k < count; k++) {
-      results.push(computeTentSineAmplitude({ s, k }));
+      const compute = useTent
+        ? computeTentSineAmplitude
+        : computeSpikeSineAmplitude;
+      results.push(compute({ s, k }));
     }
     return results;
   }
