@@ -8,6 +8,10 @@
   .buttons {
     margin-bottom: 20px;
   }
+
+  #slider {
+    width: 300px;
+  }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/wavefile"></script>
@@ -112,17 +116,17 @@
 
   // The point at which you pluck.
   const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
-  const s = 1 / phi; // 0.6180339;
-
-  const overtoneCount = 120;
-
-  // Get the Fourier amplitudes for some k values.
-  const componentAmplitudes = getAmplitudes(s, overtoneCount);
 
   // Create some samples.
   const wavDurationInSeconds = 1.5;
+  const overtoneCount = 60;
 
-  const overtoneFunction = (t) => {
+  let s = 1 / phi; // 0.6180339;
+
+  // Get the Fourier amplitudes for some k values.
+  let componentAmplitudes = getAmplitudes(s, overtoneCount);
+
+  let overtoneFunction = (t) => {
     let result = 0.0;
     for (let k = 1; k < overtoneCount; k++) {
       const frequency = getFrequencyForCosineFunction(k);
@@ -134,11 +138,31 @@
     return result;
   };
 
-  const pureFunction = (t) =>
-    amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
+  let pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
 
-  const audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
-  const pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
+  let audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
+  let pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
+
+  function computeStuff() {
+    componentAmplitudes = getAmplitudes(s, overtoneCount);
+
+    overtoneFunction = (t) => {
+      let result = 0.0;
+      for (let k = 1; k < overtoneCount; k++) {
+        const frequency = getFrequencyForCosineFunction(k);
+        result +=
+          amplitude *
+          componentAmplitudes[k] *
+          Math.cos(2.0 * Math.PI * frequency * t);
+      }
+      return result;
+    };
+
+    pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
+
+    audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
+    pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
+  }
 
   /**
    * @param {(x: number) => number} f
@@ -208,6 +232,16 @@
       <button onclick="doStop()">Stop animation</button>
     </div>
   </div>
+
+  <input
+    type="range"
+    min="0"
+    max="1"
+    step="0.01"
+    id="slider"
+    onchange="onSliderChange()"
+  />
+
   <canvas id="pluck-shape" width="300" height="300"></canvas>
   <canvas id="k-1" width="300" height="100"></canvas>
   <canvas id="k-2" width="300" height="100"></canvas>
@@ -252,5 +286,17 @@
     shouldContinue = false;
   }
 
+  function onSliderChange() {
+    const sliderElement = document.getElementById("slider");
+    if (!(sliderElement instanceof HTMLInputElement)) {
+      return;
+    }
+    s = Number(sliderElement.value);
+    doStop();
+    computeStuff();
+    drawAtElapsedTime(0);
+  }
+
+  onSliderChange();
   drawAtElapsedTime(0);
 </script>
