@@ -199,8 +199,14 @@
 
 <div class="components">
   <div class="buttons">
-    <button onclick="pureAudio.play()">Click me to play pure</button>
-    <button onclick="audio.play()">Click me to play</button>
+    <div>
+      <button onclick="pureAudio.play()">Click me to play pure</button>
+      <button onclick="audio.play()">Click me to play</button>
+    </div>
+    <div>
+      <button onclick="doAnimate()">Animate</button>
+      <button onclick="doStop()">Stop animation</button>
+    </div>
   </div>
   <canvas id="pluck-shape" width="300" height="300"></canvas>
   <canvas id="k-1" width="300" height="100"></canvas>
@@ -212,11 +218,7 @@
 </div>
 
 <script>
-  let startTime = performance.now();
-
-  function drawEverything(t) {
-    const elapsedTime = t - startTime;
-
+  function drawAtElapsedTime(elapsedTime) {
     const newAmplitudes = [];
     for (let k = 0; k < componentAmplitudes.length; k++) {
       const frequency = getFrequencyForCosineFunction(k) / baseHertz / 4.0;
@@ -228,9 +230,27 @@
     for (let k = 1; k < 7; k++) {
       drawComponent(`k-${k}`, k * k * newAmplitudes[k], k);
     }
-
-    requestAnimationFrame(drawEverything);
   }
 
-  drawEverything(startTime);
+  let startTime = performance.now();
+  let shouldContinue = true;
+  function drawEverything(t) {
+    const elapsedTime = t - startTime;
+    drawAtElapsedTime(elapsedTime);
+    if (shouldContinue) {
+      requestAnimationFrame(drawEverything);
+    }
+  }
+
+  function doAnimate() {
+    startTime = performance.now();
+    shouldContinue = true;
+    drawEverything(startTime);
+  }
+
+  function doStop() {
+    shouldContinue = false;
+  }
+
+  drawAtElapsedTime(0);
 </script>
