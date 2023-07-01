@@ -81,7 +81,7 @@
 
   const baseHertz = 440;
 
-  function getFrequencyForSineFunction(k) {
+  function getFrequencyForCosineFunction(k) {
     // Play around here to experiment with dispersion relations.
     return baseHertz * k;
   }
@@ -89,7 +89,8 @@
   const amplitude = 32000;
 
   // The point at which you pluck.
-  const s = 0.25; // 0.6180339;
+  const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
+  const s = 1 / phi; // 0.6180339;
 
   const overtoneCount = 120;
 
@@ -102,11 +103,11 @@
   const overtoneFunction = (t) => {
     let result = 0.0;
     for (let k = 1; k < overtoneCount; k++) {
-      const frequency = getFrequencyForSineFunction(k);
+      const frequency = getFrequencyForCosineFunction(k);
       result +=
         amplitude *
         componentAmplitudes[k] *
-        Math.sin(2.0 * Math.PI * frequency * t);
+        Math.cos(2.0 * Math.PI * frequency * t);
     }
     return result;
   };
@@ -196,18 +197,15 @@
 
     const newAmplitudes = [];
     for (let k = 0; k < componentAmplitudes.length; k++) {
-      const frequency = getFrequencyForSineFunction(k) / baseHertz / 4.0;
-      const factor = Math.sin(2.0 * Math.PI * frequency * (elapsedTime / 1000));
+      const frequency = getFrequencyForCosineFunction(k) / baseHertz / 4.0;
+      const factor = Math.cos(2.0 * Math.PI * frequency * (elapsedTime / 1000));
       newAmplitudes.push(componentAmplitudes[k] * factor);
     }
 
     drawPluckShape(newAmplitudes);
-    drawComponent("k-1", newAmplitudes[1], 1);
-    drawComponent("k-2", newAmplitudes[2], 2);
-    drawComponent("k-3", newAmplitudes[3], 3);
-    drawComponent("k-4", newAmplitudes[4], 4);
-    drawComponent("k-5", newAmplitudes[5], 5);
-    drawComponent("k-6", newAmplitudes[6], 6);
+    for (let k = 1; k < 7; k++) {
+      drawComponent(`k-${k}`, k * k * newAmplitudes[k], k);
+    }
 
     requestAnimationFrame(drawEverything);
   }
