@@ -299,9 +299,9 @@
   let startTime = performance.now();
   let shouldContinue = true;
   function drawEverything(t) {
-    const elapsedTime = t - startTime;
-    drawAtElapsedTime(elapsedTime);
     if (shouldContinue) {
+      const elapsedTime = t - startTime;
+      drawAtElapsedTime(elapsedTime);
       requestAnimationFrame(drawEverything);
     }
   }
