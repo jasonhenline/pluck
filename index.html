@@ -19,6 +19,10 @@
 <script>
   // @ts-check
 
+  /**
+   * @param {number} s
+   * @return {(x: number) => number}
+   */
   function getTentFunction(s) {
     return (x) => {
       if (x < s) {
@@ -29,6 +33,10 @@
     };
   }
 
+  /**
+   * @param {number} s
+   * @return {(x: number) => number}
+   */
   function getSpikeFunction(s) {
     return (x) => {
       if (x < s || x > s + 0.1) {
@@ -39,12 +47,20 @@
     };
   }
 
-  function getSineFunction(k) {
+  /**
+   * @param {number} n
+   * @return {(x: number) => number}
+   */
+  function getSineFunction(n) {
     return (x) => {
-      return Math.sin(Math.PI * k * x);
+      return Math.sin(Math.PI * n * x);
     };
   }
 
+  /**
+   * @param {(x: number) => number} f
+   * @return {number}
+   */
   function integrate(f) {
     const dx = 1e-4;
     let result = 0.0;
@@ -54,29 +70,42 @@
     return result;
   }
 
-  function computeTentSineAmplitude({ s, k }) {
+  /**
+   * @param {{s: number, n: number}} args
+   * @return number
+   */
+  function computeTentSineAmplitude({ s, n }) {
     const tentFunction = getTentFunction(s);
-    const sineFunction = getSineFunction(k);
+    const sineFunction = getSineFunction(n);
     const f = (x) => tentFunction(x) * sineFunction(x);
     return integrate(f);
   }
 
-  function computeSpikeSineAmplitude({ s, k }) {
+  /**
+   * @param {{s: number, n: number}} args
+   * @return number
+   */
+  function computeSpikeSineAmplitude({ s, n }) {
     const spikeFunction = getSpikeFunction(s);
-    const sineFunction = getSineFunction(k);
+    const sineFunction = getSineFunction(n);
     const f = (x) => spikeFunction(x) * sineFunction(x);
     return integrate(f);
   }
 
   const useTent = true;
 
+  /**
+   * @param {number} s
+   * @param {number} count
+   * @return {number[]}
+   */
   function getAmplitudes(s, count) {
     const results = [];
-    for (let k = 0; k < count; k++) {
+    for (let n = 0; n < count; n++) {
       const compute = useTent
         ? computeTentSineAmplitude
         : computeSpikeSineAmplitude;
-      results.push(compute({ s, k }));
+      results.push(compute({ s, n }));
     }
     return results;
   }
@@ -107,37 +136,42 @@
 
   const baseHertz = 440;
 
-  function getFrequencyForCosineFunction(k) {
+  /**
+   * @return {number}
+   */
+  function getFrequencyForCosineFunction(n) {
     // Play around here to experiment with dispersion relations.
-    return baseHertz * k;
+    return baseHertz * n;
   }
 
   const amplitude = 32000;
 
   // The point at which you pluck.
-  const phi = (1.0 + Math.sqrt(5.0)) / 2.0;
+  const PHI = (1.0 + Math.sqrt(5.0)) / 2.0;
 
   // Create some samples.
   const wavDurationInSeconds = 1.5;
   const overtoneCount = 60;
 
-  let s = 1 / phi; // 0.6180339;
+  let s = 1 / PHI;
 
-  // Get the Fourier amplitudes for some k values.
+  // Get the Fourier amplitudes for some n values.
   let componentAmplitudes = getAmplitudes(s, overtoneCount);
 
+  /** @type {(t: number) => number} */
   let overtoneFunction = (t) => {
     let result = 0.0;
-    for (let k = 1; k < overtoneCount; k++) {
-      const frequency = getFrequencyForCosineFunction(k);
+    for (let n = 1; n < overtoneCount; n++) {
+      const frequency = getFrequencyForCosineFunction(n);
       result +=
         amplitude *
-        componentAmplitudes[k] *
+        componentAmplitudes[n] *
         Math.cos(2.0 * Math.PI * frequency * t);
     }
     return result;
   };
 
+  /** @type {(t: number) => number} */
   let pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
 
   let audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
@@ -148,11 +182,11 @@
 
     overtoneFunction = (t) => {
       let result = 0.0;
-      for (let k = 1; k < overtoneCount; k++) {
-        const frequency = getFrequencyForCosineFunction(k);
+      for (let n = 1; n < overtoneCount; n++) {
+        const frequency = getFrequencyForCosineFunction(n);
         result +=
           amplitude *
-          componentAmplitudes[k] *
+          componentAmplitudes[n] *
           Math.cos(2.0 * Math.PI * frequency * t);
       }
       return result;
@@ -201,9 +235,9 @@
     if (pluckShapeCanvas instanceof HTMLCanvasElement) {
       const f = (x) => {
         let result = 0.0;
-        for (let k = 0; k < amplitudes.length; k++) {
-          const amplitude = amplitudes[k];
-          const sineFunction = getSineFunction(k);
+        for (let n = 0; n < amplitudes.length; n++) {
+          const amplitude = amplitudes[n];
+          const sineFunction = getSineFunction(n);
           result += amplitude * sineFunction(x);
         }
         return result;
@@ -212,10 +246,10 @@
     }
   }
 
-  function drawComponent(name, amplitude, k) {
+  function drawComponent(name, amplitude, n) {
     const canvasElement = document.getElementById(name);
     if (canvasElement instanceof HTMLCanvasElement) {
-      const sineFunction = getSineFunction(k);
+      const sineFunction = getSineFunction(n);
       drawGraph((x) => amplitude * sineFunction(x), canvasElement);
     }
   }
@@ -243,26 +277,26 @@
   />
 
   <canvas id="pluck-shape" width="300" height="300"></canvas>
-  <canvas id="k-1" width="300" height="100"></canvas>
-  <canvas id="k-2" width="300" height="100"></canvas>
-  <canvas id="k-3" width="300" height="100"></canvas>
-  <canvas id="k-4" width="300" height="100"></canvas>
-  <canvas id="k-5" width="300" height="100"></canvas>
-  <canvas id="k-6" width="300" height="100"></canvas>
+  <canvas id="n-1" width="300" height="100"></canvas>
+  <canvas id="n-2" width="300" height="100"></canvas>
+  <canvas id="n-3" width="300" height="100"></canvas>
+  <canvas id="n-4" width="300" height="100"></canvas>
+  <canvas id="n-5" width="300" height="100"></canvas>
+  <canvas id="n-6" width="300" height="100"></canvas>
 </div>
 
 <script>
   function drawAtElapsedTime(elapsedTime) {
     const newAmplitudes = [];
-    for (let k = 0; k < componentAmplitudes.length; k++) {
-      const frequency = getFrequencyForCosineFunction(k) / baseHertz / 4.0;
+    for (let n = 0; n < componentAmplitudes.length; n++) {
+      const frequency = getFrequencyForCosineFunction(n) / baseHertz / 4.0;
       const factor = Math.cos(2.0 * Math.PI * frequency * (elapsedTime / 1000));
-      newAmplitudes.push(componentAmplitudes[k] * factor);
+      newAmplitudes.push(componentAmplitudes[n] * factor);
     }
 
     drawPluckShape(newAmplitudes);
-    for (let k = 1; k < 7; k++) {
-      drawComponent(`k-${k}`, k * k * newAmplitudes[k], k);
+    for (let n = 1; n < 7; n++) {
+      drawComponent(`n-${n}`, n * n * newAmplitudes[n], n);
     }
   }
 
