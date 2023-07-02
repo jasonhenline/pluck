@@ -6,11 +6,17 @@
   }
 
   .buttons {
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   #slider {
-    width: 300px;
+    width: 400px;
+  }
+
+  * + * {
+    margin-top: 20px;
   }
 </style>
 
@@ -24,6 +30,21 @@
 
   /** The frequency of the base note. */
   const baseHertz = 440;
+
+  /** Amplitude in the wavefile. */
+  const amplitude = 32000;
+
+  /** The golden ratio. */
+  const PHI = (1.0 + Math.sqrt(5.0)) / 2.0;
+
+  /** How long the sound clip will last, in seconds. */
+  const wavDurationInSeconds = 1.5;
+
+  /** How many overtone amplitudes we will compute. */
+  const overtoneCount = 60;
+
+  // The place where the string is plucked. */
+  let s = 1 / PHI;
 
   /**
    * @param {number} s
@@ -124,16 +145,10 @@
     return baseHertz * n;
   }
 
-  const amplitude = 32000;
+  /** @type {(t: number) => number} */
+  let pureFunction = (t) => amplitude * Math.cos(2.0 * Math.PI * baseHertz * t);
 
-  // The point at which you pluck.
-  const PHI = (1.0 + Math.sqrt(5.0)) / 2.0;
-
-  // Create some samples.
-  const wavDurationInSeconds = 1.5;
-  const overtoneCount = 60;
-
-  let s = 1 / PHI;
+  /// Here is stuff that will be computed by computeStuff.
 
   // Get the Fourier amplitudes for some n values.
   let componentAmplitudes = getAmplitudes(s, overtoneCount);
@@ -150,9 +165,6 @@
     }
     return result;
   };
-
-  /** @type {(t: number) => number} */
-  let pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
 
   let audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
   let pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
@@ -172,8 +184,6 @@
       return result;
     };
 
-    pureFunction = (t) => amplitude * Math.sin(2.0 * Math.PI * baseHertz * t);
-
     audio = createAudioElement(overtoneFunction, wavDurationInSeconds);
     pureAudio = createAudioElement(pureFunction, wavDurationInSeconds);
   }
@@ -191,6 +201,7 @@
       return;
     }
     context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
     // Draw axes.
     context.strokeStyle = "black";
     context.beginPath();
@@ -256,16 +267,21 @@
     onchange="onSliderChange()"
   />
 
-  <canvas id="pluck-shape" width="300" height="300"></canvas>
-  <canvas id="n-1" width="300" height="100"></canvas>
-  <canvas id="n-2" width="300" height="100"></canvas>
-  <canvas id="n-3" width="300" height="100"></canvas>
-  <canvas id="n-4" width="300" height="100"></canvas>
-  <canvas id="n-5" width="300" height="100"></canvas>
-  <canvas id="n-6" width="300" height="100"></canvas>
+  <canvas id="pluck-shape" width="400" height="200"></canvas>
+  <canvas id="n-1" width="400" height="100"></canvas>
+  <canvas id="n-2" width="400" height="100"></canvas>
+  <canvas id="n-3" width="400" height="100"></canvas>
+  <canvas id="n-4" width="400" height="100"></canvas>
+  <canvas id="n-5" width="400" height="100"></canvas>
+  <canvas id="n-6" width="400" height="100"></canvas>
 </div>
 
 <script>
+  const sliderElement = document.getElementById("slider");
+  if (sliderElement instanceof HTMLInputElement) {
+    sliderElement.value = s.toString();
+  }
+
   function drawAtElapsedTime(elapsedTime) {
     const newAmplitudes = [];
     for (let n = 0; n < componentAmplitudes.length; n++) {
@@ -301,7 +317,6 @@
   }
 
   function onSliderChange() {
-    const sliderElement = document.getElementById("slider");
     if (!(sliderElement instanceof HTMLInputElement)) {
       return;
     }
