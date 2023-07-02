@@ -19,6 +19,12 @@
 <script>
   // @ts-check
 
+  /** If false, use the spike function instead of the tent function. */
+  const useTent = true;
+
+  /** The frequency of the base note. */
+  const baseHertz = 440;
+
   /**
    * @param {number} s
    * @return {(x: number) => number}
@@ -71,41 +77,17 @@
   }
 
   /**
-   * @param {{s: number, n: number}} args
-   * @return number
-   */
-  function computeTentSineAmplitude({ s, n }) {
-    const tentFunction = getTentFunction(s);
-    const sineFunction = getSineFunction(n);
-    const f = (x) => tentFunction(x) * sineFunction(x);
-    return integrate(f);
-  }
-
-  /**
-   * @param {{s: number, n: number}} args
-   * @return number
-   */
-  function computeSpikeSineAmplitude({ s, n }) {
-    const spikeFunction = getSpikeFunction(s);
-    const sineFunction = getSineFunction(n);
-    const f = (x) => spikeFunction(x) * sineFunction(x);
-    return integrate(f);
-  }
-
-  const useTent = true;
-
-  /**
    * @param {number} s
    * @param {number} count
    * @return {number[]}
    */
   function getAmplitudes(s, count) {
+    const initialFunction = useTent ? getTentFunction(s) : getSpikeFunction(s);
     const results = [];
     for (let n = 0; n < count; n++) {
-      const compute = useTent
-        ? computeTentSineAmplitude
-        : computeSpikeSineAmplitude;
-      results.push(compute({ s, n }));
+      const sineFunction = getSineFunction(n);
+      const f = (x) => initialFunction(x) * sineFunction(x);
+      results.push(integrate(f));
     }
     return results;
   }
@@ -133,8 +115,6 @@
     const url = URL.createObjectURL(blob);
     return new Audio(url);
   }
-
-  const baseHertz = 440;
 
   /**
    * @return {number}
@@ -268,11 +248,11 @@
   </div>
 
   <input
+    id="slider"
     type="range"
     min="0"
     max="1"
     step="0.01"
-    id="slider"
     onchange="onSliderChange()"
   />
 
