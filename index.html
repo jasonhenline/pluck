@@ -247,16 +247,24 @@
 </script>
 
 <div class="components">
-  <div class="buttons">
-    <div>
-      <button onclick="pureAudio.play()">Click me to play pure</button>
-      <button onclick="audio.play()">Click me to play</button>
-    </div>
-    <div>
-      <button onclick="doAnimate()">Animate</button>
-      <button onclick="doStop()">Stop animation</button>
-    </div>
-  </div>
+  <table>
+    <tr>
+      <td>
+        <button onclick="pureAudio.play()">Click me to play pure</button>
+      </td>
+      <td>
+        <button onclick="audio.play()">Click me to play</button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <button onclick="doAnimate()">Animate</button>
+      </td>
+      <td>
+        <button onclick="doStop()">Stop animation</button>
+      </td>
+    </tr>
+  </table>
 
   <input
     id="slider"
