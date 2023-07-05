@@ -164,13 +164,19 @@
   // Get the Fourier amplitudes for some n values.
   let componentAmplitudes = getAmplitudes(s, overtoneCount);
 
+  // Where are the pick-ups that track the motion of the string.
+  let pickupLocation = 1 / PHI;
+
   /** @type {(t: number) => number} */
   let overtoneFunction = (t) => {
     let result = 0.0;
     for (let n = 1; n < overtoneCount; n++) {
       const frequency = getFrequencyForCosineFunction(n);
       result +=
-        amplitude * componentAmplitudes[n] * Math.cos(TAU * frequency * t);
+        amplitude *
+        componentAmplitudes[n] *
+        Math.sin((TAU / 2) * n * pickupLocation) *
+        Math.cos(TAU * frequency * t);
     }
     return result;
   };
