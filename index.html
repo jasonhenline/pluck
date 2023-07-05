@@ -33,6 +33,9 @@
 <script>
   // @ts-check
 
+  // https://tauday.com/tau-manifesto
+  const TAU = 2 * Math.PI;
+
   /** If false, use the spike function instead of the tent function. */
   const useTent = true;
 
@@ -88,7 +91,7 @@
    */
   function getSineFunction(n) {
     return (x) => {
-      return Math.sin(Math.PI * n * x);
+      return Math.sin((TAU / 2) * n * x);
     };
   }
 
@@ -154,7 +157,7 @@
   }
 
   /** @type {(t: number) => number} */
-  let pureFunction = (t) => amplitude * Math.cos(2.0 * Math.PI * baseHertz * t);
+  let pureFunction = (t) => amplitude * Math.cos(TAU * baseHertz * t);
 
   /// Here is stuff that will be computed by computeStuff.
 
@@ -167,9 +170,7 @@
     for (let n = 1; n < overtoneCount; n++) {
       const frequency = getFrequencyForCosineFunction(n);
       result +=
-        amplitude *
-        componentAmplitudes[n] *
-        Math.cos(2.0 * Math.PI * frequency * t);
+        amplitude * componentAmplitudes[n] * Math.cos(TAU * frequency * t);
     }
     return result;
   };
@@ -185,9 +186,7 @@
       for (let n = 1; n < overtoneCount; n++) {
         const frequency = getFrequencyForCosineFunction(n);
         result +=
-          amplitude *
-          componentAmplitudes[n] *
-          Math.cos(2.0 * Math.PI * frequency * t);
+          amplitude * componentAmplitudes[n] * Math.cos(TAU * frequency * t);
       }
       return result;
     };
@@ -302,7 +301,7 @@
     const newAmplitudes = [];
     for (let n = 0; n < componentAmplitudes.length; n++) {
       const frequency = getFrequencyForCosineFunction(n) / baseHertz / 4.0;
-      const factor = Math.cos(2.0 * Math.PI * frequency * (elapsedTime / 1000));
+      const factor = Math.cos(TAU * frequency * (elapsedTime / 1000));
       newAmplitudes.push(componentAmplitudes[n] * factor);
     }
 
