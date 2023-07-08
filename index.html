@@ -34,9 +34,6 @@
   // https://tauday.com/tau-manifesto
   const TAU = 2 * Math.PI;
 
-  /** If false, use the spike function instead of the tent function. */
-  const useTent = true;
-
   /** The frequency of the base note. */
   const baseHertz = 440;
 
@@ -44,7 +41,7 @@
   const PHI = (1.0 + Math.sqrt(5.0)) / 2.0;
 
   /** How long the sound clip will last, in seconds. */
-  const wavDurationInSeconds = 1.5;
+  const audioDurationInSeconds = 1.5;
 
   /** How many overtone amplitudes we will compute. */
   const overtoneCount = 60;
@@ -56,26 +53,19 @@
    * @param {number} s
    * @return {(x: number) => number}
    */
-  function getTentFunction(s) {
+  function getPluckFunction(s) {
+    // return (x) => {
+    //   if (s <= x && x < s + 0.1) {
+    //     return 1.0;
+    //   } else {
+    //     return 0.0;
+    //   }
+    // };
     return (x) => {
       if (x < s) {
         return x / s;
       } else {
         return (1 - x) / (1 - s);
-      }
-    };
-  }
-
-  /**
-   * @param {number} s
-   * @return {(x: number) => number}
-   */
-  function getSpikeFunction(s) {
-    return (x) => {
-      if (x < s || x > s + 0.1) {
-        return 0.0;
-      } else {
-        return (x - s) / 0.1;
       }
     };
   }
@@ -109,7 +99,7 @@
    * @return {number[]}
    */
   function getAmplitudes(s, count) {
-    const initialFunction = useTent ? getTentFunction(s) : getSpikeFunction(s);
+    const initialFunction = getPluckFunction(s);
     const results = [];
     for (let n = 0; n < count; n++) {
       const sineFunction = getSineFunction(n);
@@ -122,6 +112,14 @@
   const audioContext = new AudioContext();
 
   /**
+   * @return {number}
+   */
+  function getFrequencyForCosineFunction(n) {
+    // Play around here to experiment with dispersion relations.
+    return baseHertz * n;
+  }
+
+  /**
    * Creates an audio buffer from an air pressure function.
    *
    * @param {(t: number) => number} f A function from time (in seconds) to pressure [-1, 1].
@@ -129,7 +127,7 @@
    * @return {AudioBuffer}
    */
   function createAudioBuffer(f, durationInSeconds) {
-    const SAMPLES_PER_SECOND = 44100; // standard value used by wav files
+    const SAMPLES_PER_SECOND = 44100;
     const sampleCount = SAMPLES_PER_SECOND * durationInSeconds;
     const audioBuffer = audioContext.createBuffer(
       1,
@@ -141,14 +139,6 @@
       channelData[t] = f(t / SAMPLES_PER_SECOND);
     }
     return audioBuffer;
-  }
-
-  /**
-   * @return {number}
-   */
-  function getFrequencyForCosineFunction(n) {
-    // Play around here to experiment with dispersion relations.
-    return baseHertz * n;
   }
 
   /** @type {(t: number) => number} */
@@ -185,13 +175,13 @@
     source.start();
   }
 
-  let audio = createAudioBuffer(overtoneFunction, wavDurationInSeconds);
-  let pureAudio = createAudioBuffer(pureFunction, wavDurationInSeconds);
+  let audio = createAudioBuffer(overtoneFunction, audioDurationInSeconds);
+  let pureAudio = createAudioBuffer(pureFunction, audioDurationInSeconds);
 
   function computeStuff() {
     componentAmplitudes = getAmplitudes(s, overtoneCount);
-    audio = createAudioBuffer(overtoneFunction, wavDurationInSeconds);
-    pureAudio = createAudioBuffer(pureFunction, wavDurationInSeconds);
+    audio = createAudioBuffer(overtoneFunction, audioDurationInSeconds);
+    pureAudio = createAudioBuffer(pureFunction, audioDurationInSeconds);
   }
 
   /**
